@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Arp command to detect
+arp -a | grep -v "incomplete" | awk '{print $2}' > connected_devices.txt
+
+# Print the list of connected devices
+cat connected_devices.txt
