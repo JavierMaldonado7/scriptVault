@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Set up a dummy open port (e.g., port 22 for SSH)
+sudo nc -lk -p 22 &
+
+tail -f /var/log/auth.log | while read -r line; do
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $line" >> honeypot.log
+    # Custom rules for detecting attack patterns
+    if [[ $line == *'Failed password'* ]]; then
+    # Extract the IP address from the log line (customize this based on your log format)
+    IP_TO_BLOCK=$(echo "$line" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}')
+
+    # Block the IP using the block_ips.sh script
+    ./block_ips.sh "$IP_TO_BLOCK"
+fi
+
+iptables-save > /etc/iptables/rules.v4
+
+done
